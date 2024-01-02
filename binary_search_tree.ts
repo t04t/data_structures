@@ -12,57 +12,111 @@ export default class BinaryTree {
     this.left = left;
     this.right = right;
   }
-}
 
-function sortedArrayToBSTHelper(
-  nums: number[],
-  start: number,
-  end: number
-): BinaryTree {
-  if (start === end) return new BinaryTree(nums[start]);
-  const middle = Math.floor((start + end) / 2);
-
-  let left: BinaryTree | null = null;
-  if (middle - 1 >= start) {
-    left = sortedArrayToBSTHelper(nums, start, middle - 1);
+  printInOrder() {
+    this.inOrderWalk(this);
+    console.log("");
   }
 
-  let right: BinaryTree | null = null;
-  if (middle + 1 <= end) {
-    right = sortedArrayToBSTHelper(nums, middle + 1, end);
+  inOrderWalk(tRoot: BinaryTree | null) {
+    if (tRoot !== null) {
+      this.inOrderWalk(tRoot.left);
+      process.stdout.write(tRoot.data + " ");
+      this.inOrderWalk(tRoot.right);
+    }
+  }
+}
+
+class BinarySearchTree {
+  arrList: number[];
+  root: BinaryTree | null;
+  constructor(arrList: number[]) {
+    let sortedList: number[] = arrList.sort(function (a, b) {
+      return a - b;
+    });
+    this.arrList = arrList;
+    this.root = BinarySearchTree.sortedArrayToBST(sortedList);
   }
 
-  const root: BinaryTree = new BinaryTree(nums[middle], left, right);
-  return root;
+  printSorted() {
+    this.root?.printInOrder();
+  }
+
+  // 再帰でたどる
+  static sortedArrayToBSTHelper(
+    nums: number[],
+    start: number,
+    end: number
+  ): BinaryTree {
+    if (start === end) return new BinaryTree(nums[start]);
+    const middle = Math.floor((start + end) / 2);
+
+    let left: BinaryTree | null = null;
+    if (middle - 1 >= start) {
+      left = BinarySearchTree.sortedArrayToBSTHelper(nums, start, middle - 1);
+    }
+
+    let right: BinaryTree | null = null;
+    if (middle + 1 <= end) {
+      right = BinarySearchTree.sortedArrayToBSTHelper(nums, middle + 1, end);
+    }
+
+    const root: BinaryTree = new BinaryTree(nums[middle], left, right);
+    return root;
+  }
+
+  static sortedArrayToBST(nums: number[]) {
+    if (nums.length === 0) return null;
+    return BinarySearchTree.sortedArrayToBSTHelper(nums, 0, nums.length - 1);
+  }
+
+  // BSTリストの中にkeyが存在するかどうか
+  isKeyExists(key: number): boolean {
+    let iterator = this.root;
+    while (iterator != null) {
+      if (iterator.data == key) return true;
+      if (iterator.data > key) iterator = iterator.left;
+      else iterator = iterator.right;
+    }
+    return false;
+  }
+
+  insert(value: number): void {
+    let iterator = this.root;
+    while (iterator != null) {
+      if (iterator.data > value && iterator.left === null) {
+        iterator.left = new BinaryTree(value);
+      } else if (iterator.data < value && iterator.right === null) {
+        iterator.right = new BinaryTree(value);
+      }
+      iterator = value > iterator.data ? iterator.right : iterator.left;
+    }
+  }
 }
 
-function sortedArrayToBST(nums: number[]) {
-  if (nums.length === 0) return null;
-  return sortedArrayToBSTHelper(nums, 0, nums.length - 1);
-}
-
-function isKeyExists(key: number, bst: BinaryTree | null): boolean {
-  if (bst === null) return false;
-  if (bst.data === key) return true;
-
-  if (bst.data > key) return isKeyExists(key, bst.left);
-  else return isKeyExists(key, bst.right);
-}
-
-const bst = sortedArrayToBST([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+const bst = new BinarySearchTree([
+  4, 43, 36, 46, 32, 7, 97, 95, 34, 8, 96, 35, 85, 1010, 232,
+]);
 console.log(bst);
-// BinaryTree {
-//   data: 6,
-//   left: BinaryTree {
-//     data: 3,
-//     left: BinaryTree { data: 1, left: null, right: [BinaryTree] },
-//     right: BinaryTree { data: 4, left: null, right: [BinaryTree] }
-//   },
-//   right: BinaryTree {
-//     data: 9,
-//     left: BinaryTree { data: 7, left: null, right: [BinaryTree] },
-//     right: BinaryTree { data: 10, left: null, right: [BinaryTree] }
+// BinarySearchTree {
+//   arrList: [
+//      4,  7,  8,  32,   34,
+//     35, 36, 43,  46,   85,
+//     95, 96, 97, 232, 1010
+//   ],
+//   root: BinaryTree {
+//     data: 43,
+//     left: BinaryTree { data: 32, left: [BinaryTree], right: [BinaryTree] },
+//     right: BinaryTree { data: 96, left: [BinaryTree], right: [BinaryTree] }
 //   }
 // }
-console.log(isKeyExists(5, bst)); // true
-console.log(isKeyExists(100, bst)); // false
+
+console.log(bst.isKeyExists(7)); // true
+console.log(bst.isKeyExists(100)); // false
+
+bst.printSorted(); // 4 7 8 32 34 35 36 43 46 85 95 96 97 232 1010
+bst.insert(10);
+bst.printSorted(); // 4 7 8 10 32 34 35 36 43 46 85 95 96 97 232 1010
+bst.insert(100);
+bst.insert(0);
+bst.printSorted(); // 0 4 7 8 10 32 34 35 36 43 46 85 95 96 97 100 232 1010
