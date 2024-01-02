@@ -1,4 +1,4 @@
-class Item {
+export default class Item {
   data: number;
   next: Item | null;
 
