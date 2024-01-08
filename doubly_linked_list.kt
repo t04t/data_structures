@@ -22,6 +22,27 @@ internal class DoublyLinkedList(arr: IntArray) {
         }
     }
 
+    fun at(index: Int): Node? {
+        var iterator = head
+        for (i in 0 until index) {
+            iterator = iterator!!.next
+            if (iterator == null) return null
+        }
+        return iterator
+    }
+
+    fun reverse() {
+        var currentNode = head
+        head = tail
+        tail = currentNode
+        while (currentNode != null) {
+            var prevNode = currentNode.prev
+            currentNode.prev = currentNode.next
+            currentNode.next = prevNode
+            currentNode = currentNode.prev
+        }
+    }
+
     fun printList() {
         var iterator = head
         var str = ""
@@ -31,10 +52,24 @@ internal class DoublyLinkedList(arr: IntArray) {
         }
         println("[${str.substring(0, str.length-1)}]")
     }
+
+    fun printReverse() {
+        var iterator = tail
+        var str = ""
+        while (iterator != null) {
+            str += iterator.data.toString() + "→"
+            iterator = iterator.prev
+        }
+        println("[${str.substring(0, str.length - 1)}]")
+    }
 }
 
 fun main() {
   val numbers = listOf(1,2,3,4,5)
   val numList = DoublyLinkedList(numbers.toIntArray())
-  numList.printList()
+  numList.printList() // [1→2→3→4→5]
+  println(numList.at(3)!!.data) // 4
+  numList.reverse()
+  numList.printList() // [5→4→3→2→1]
+  numList.printReverse() // [1→2→3→4→5]
 }
